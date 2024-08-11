@@ -1,13 +1,18 @@
 import socket
 import threading
+from cryptography.fernet import Fernet
+
+key = Fernet.generate_key()
+cipher = Fernet(key)
 
 def handle_client(client_socket, client_address):
     print(f"Client {client_address} connected.")
-    client_socket.send("Welcome to the chat!".encode('utf-8'))
+    client_socket.send(key)
     while True:
-        message = client_socket.recv(1024).decode('utf-8')
+        message = client_socket.recv(1024)
         if message:
-            print(f"Client {client_address}: {message}")
+            decrypted_message = cipher.decrypt(message).decode('utf-8')
+            print(f"Client {client_address}: {decrypted_message}")
         else:
             break
     client_socket.close()
